@@ -1,0 +1,29 @@
+# start zookeeper
+zookeeper-server-start.sh $KAFKA_HOME/config/zookeeper.properties
+
+# start server
+kafka-server-start.sh $KAFKA_HOME/config/server.properties
+
+# producer/read data from the source
+$KAFKA_HOME/bin/connect-standalone.sh \
+$KAFKA_HOME/config/connect-standalone.properties \
+/media/danielbastidas/HardDisk/BigData/kafka/connect-file-source.properties
+
+# consumer/see what is in the topic
+$KAFKA_HOME/bin/kafka-console-consumer.sh \
+--bootstrap-server localhost:9092 \
+--topic parquet-source \
+--from-beginning
+
+# export class path to use kafka hadoop sink class
+export CLASSPATH=/media/danielbastidas/HardDisk/BigData/kafka/lib/*
+
+# sending data to hadoop
+$KAFKA_HOME/bin/connect-standalone.sh \
+$KAFKA_HOME/config/connect-standalone.properties \
+/media/danielbastidas/HardDisk/BigData/kafka/connect-file-source.properties \
+/media/danielbastidas/HardDisk/BigData/kafka/connect-hdfs-sink.properties
+
+
+
+

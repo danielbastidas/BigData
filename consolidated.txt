@@ -1,0 +1,49 @@
+# start zookeeper
+zookeeper-server-start.sh $KAFKA_HOME/config/zookeeper.properties
+
+# start server
+kafka-server-start.sh $KAFKA_HOME/config/server.properties
+
+# producer/read data from the source
+$KAFKA_HOME/bin/connect-standalone.sh \
+$KAFKA_HOME/config/connect-standalone.properties \
+/media/danielbastidas/HardDisk/BigData/kafka/connect-file-source.properties
+
+# consumer/see what is in the topic
+$KAFKA_HOME/bin/kafka-console-consumer.sh \
+--bootstrap-server localhost:9092 \
+--topic parquet-source \
+--from-beginning
+
+# configure the kafka hadoop sink connector adding the following line in $KAFKA_HOME/config/connect-standalone.properties file 
+plugin.path=/media/danielbastidas/HardDisk/BigData/kafka/confluentinc-kafka-connect-hdfs3-1.1.3/
+
+# sending data to hadoop
+$KAFKA_HOME/bin/connect-standalone.sh \
+$KAFKA_HOME/config/connect-standalone.properties \
+/media/danielbastidas/HardDisk/BigData/kafka/connect-hdfs-sink.properties
+
+# format the hadoop file system
+hdfs namenode -format
+
+# hadoop temporary storage directory
+/tmp/hadoop-danielbastidas/dfs/name
+
+# Hadoop Start NameNode daemon and DataNode daemon: 
+start-dfs.sh
+
+# browse the hadoop app
+http://localhost:9870/
+
+# see the content in hadoop
+hadoop fs -cat /media/danielbastidas/HardDisk/BigData/sink/parquet-source/partition=0/*
+#hadoop fs -cat spark-data-engg/topics/file-source-test/partition=0/*
+
+# create the hadoop folder
+hadoop fs -mkdir /media/danielbastidas/HardDisk/BigData/sink
+
+# list the hadoop file system
+hadoop fs -ls
+
+hadoop fs -ls /media/danielbastidas/HardDisk/BigData/sink/parquet-source/
+
